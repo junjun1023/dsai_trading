@@ -28,18 +28,19 @@ class Dataset(BaseDataset):
         def __getitem__(self, i):
 
                 # read image
-                to_date = i+self.reference
-                data = self.dataframe[i: to_date]
+                # ref_from = i
+                ref_to = i+self.reference
+                ref = self.dataframe[i: ref_to]
                 
-                gt = self.dataframe[to_date: to_date+1]
+                gt = self.dataframe[ref_to: ref_to+30]
 
                 # Cvt 2 image and normalize
                 # not 255
-                data = data.to_numpy(dtype=np.uint8)
-                data = data / 255
+                data = data.to_numpy(dtype=np.double)
+                # data = data / 255
 
-                gt = gt.to_numpy(dtype=np.uint8)
-                gt = gt / 255
+                gt = gt.to_numpy(dtype=np.double)
+                # gt = gt / 255
 
                 # apply preprocessing
                 if self.preprocessing:

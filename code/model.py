@@ -209,12 +209,12 @@ class Extractor(nn.Module):
 
 
 class Decoder(nn.Module):
-        def __init__(self, classes, input_size=4, hidden_size=16, num_layers=32, batch_first=True):
+        def __init__(self, classes, input_size=4, hidden_size=64, num_layers=32, batch_first=True):
                 super(Decoder, self).__init__()
 
                 self.rnn = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, batch_first=True)
                 self.linear1 = nn.Linear(in_features=hidden_size, out_features=hidden_size//2, bias=True)
-                self.linear2 = nn.Linear(in_features=hidden_size//2, out_features=1, bias=True)
+                self.linear2 = nn.Linear(in_features=hidden_size//2, out_features=classes, bias=True)
                 self.relu = nn.ReLU(inplace=True)
 
         def forward(self, x):
