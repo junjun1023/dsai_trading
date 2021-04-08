@@ -36,7 +36,7 @@ class Dataset(BaseDataset):
 
                 # Cvt 2 image and normalize
                 # not 255
-                data = data.to_numpy(dtype=np.double)
+                ref = ref.to_numpy(dtype=np.double)
                 # data = data / 255
 
                 gt = gt.to_numpy(dtype=np.double)
@@ -44,7 +44,7 @@ class Dataset(BaseDataset):
 
                 # apply preprocessing
                 if self.preprocessing:
-                        sample = self.preprocessing(image=data)
+                        sample = self.preprocessing(image=ref)
         
-                return data, gt
+                return ref, gt
                 
