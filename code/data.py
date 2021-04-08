@@ -10,29 +10,37 @@ from torch.utils.data import Dataset as BaseDataset
 
 class Dataset(BaseDataset):
 
-        def __init__(self, path, reference=100, preprocessing=None):
+        def __init__(self, path, forecast=30,reference=100, preprocessing=None):
                 
 
                 self.path = path
-
+                self.forecast = forecast
                 self.reference = reference
                 self.dataframe = pd.read_csv(path, names=["open", "high", "low", "close"])
 
                 self.preprocessing = preprocessing
+
+                for _ in range(forecast-1):
+                        self.dataframe = self.dataframe.append(
+                                pd.Series({"open": np.nan, "high": np.nan, "low": np.nan, "close": np.nan}), 
+                                ignore_index=True)
+
                 # self.ids = range(len(self.dataframe) - reference)
         
 
         def __len__(self):
-                return len(self.dataframe) - self.reference
+                return len(self.dataframe) - self.reference - 1
         
         def __getitem__(self, i):
 
                 # read image
                 # ref_from = i
                 ref_to = i+self.reference
-                ref = self.dataframe[i: ref_to]
                 
-                gt = self.dataframe[ref_to: ref_to+30]
+                ref = self.dataframe[i: ref_to]
+
+                gt = self.dataframe[ref_to: ref_to+self.forecast]
+                
 
                 # Cvt 2 image and normalize
                 # not 255
