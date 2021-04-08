@@ -25,11 +25,13 @@ class Dataset(BaseDataset):
                                 pd.Series({"open": np.nan, "high": np.nan, "low": np.nan, "close": np.nan}), 
                                 ignore_index=True)
 
+                # print(len(self.dataframe))
+
                 # self.ids = range(len(self.dataframe) - reference)
         
 
         def __len__(self):
-                return len(self.dataframe) - self.reference - 1
+                return len(self.dataframe) - (self.forecast - 1) - self.reference - 1
         
         def __getitem__(self, i):
 
