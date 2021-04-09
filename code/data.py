@@ -31,7 +31,7 @@ class Dataset(BaseDataset):
         
 
         def __len__(self):
-                return len(self.dataframe) - (self.forecast - 1) - self.reference - 1
+                return len(self.dataframe) - (self.forecast - 1) - self.reference
         
         def __getitem__(self, i):
 
