@@ -1,6 +1,9 @@
 import torch
+import torch.nn as nn
+from tqdm import tqdm
+from torch.utils.data import DataLoader
 
-def train_epoch(predictor, optimizer, dataloader):
+def train_epoch(predictor, optimizer, dataloader, device):
 
         predictor.train()
 
@@ -11,12 +14,12 @@ def train_epoch(predictor, optimizer, dataloader):
                 optimizer.zero_grad()
 
                 ref, gt = data # batch, 100, 4
-                gt = gt[:, :, 0].to(predictor.device, dtype=torch.float)
+                gt = gt[:, :, 0].to(device, dtype=torch.float)
         
                 
                 ref = torch.unsqueeze(ref, 1) # batch, channels, 100, 4
                 ref = torch.transpose(ref, 2, 3) # batch, channels, 4, 100
-                ref = ref.to(predictor.device, dtype=torch.float)
+                ref = ref.to(device, dtype=torch.float)
 
                 _, pr = predictor(ref)
 
@@ -30,10 +33,10 @@ def train_epoch(predictor, optimizer, dataloader):
         #         pr = pr.view(batch, -1)
                 
                 
-                loss = torch.tensor(0, dtype=torch.float).to(predictor.device)
+                loss = torch.tensor(0, dtype=torch.float).to(device)
 
                 ### sampling
-                for sample in range(samples):
+                for sample in range(5):
         #             for _gt, _pr in zip(gt, pr):
                 
                         _gt = gt
@@ -53,21 +56,19 @@ def train_epoch(predictor, optimizer, dataloader):
 
                         loss += nn.BCELoss()(y_pr, y_gt)
                                 
-                        loss.backward()
-                        optimizer.step()
-                
-                        epoch_loss += loss.item()
+                loss.backward()
+                optimizer.step()
+        
+                epoch_loss += loss.item()
         
 
         epoch_loss = epoch_loss/(index+1)
-
-        print("\nEpoch: {}, bce= {:.3f}".format(epoch+1, epoch_loss))
 
         return epoch_loss
 
 
 @torch.no_grad()
-def test_epoch(predictor, dataset):
+def test_epoch(predictor, dataset, device):
         
         import math
         predictor.eval()
@@ -81,12 +82,12 @@ def test_epoch(predictor, dataset):
         for index, data in tqdm(enumerate(dataloader)):
 
                 ref, gt = data # batch, 100, 4
-                gt = gt[:, :, 0].to(predictor.device, dtype=torch.float)
+                gt = gt[:, :, 0].to(device, dtype=torch.float)
 
                 ref = torch.unsqueeze(ref, 1) # batch, channels, 100, 4
                 ref = torch.transpose(ref, 2, 3) # batch, channels, 4, 100
 
-                ref = ref.to(predictor.device, dtype=torch.float)
+                ref = ref.to(device, dtype=torch.float)
 
                 _, pr = predictor(ref)
                 
@@ -95,19 +96,18 @@ def test_epoch(predictor, dataset):
                 
                 gt = gt[pos]
                 pr = pr[pos]
-                gt = torch.squeeze(gt)
-                pr = torch.squeeze(pr)
 
                 pr = pr.detach().cpu().numpy().tolist()
                 gt = gt.detach().cpu().numpy().tolist()
+
+                truth.append(gt[0])
                 
                 if len(forward) == 0:
                         forward = pr
                         forward = [p / math.pow(2, i) for i, p in enumerate(forward)]
                         
-                        truth.append(gt[0])
+
                 else:
-                        truth.append(gt[-1])
                         predict.append(forward[0])
                         forward = forward[1:] # pop the first element
                         forward += [0]
