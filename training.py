@@ -17,7 +17,7 @@ from code import evaluation
 
 # variable setting
 root = os.getcwd()
-batch = 16
+batch = 32
 forecast = 30
 samples = 5
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -29,7 +29,8 @@ datetime = datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M")
 dataset = Dataset(path=os.path.join(root, "training.csv"))
 
 # model
-encoder = model.Extractor(in_channels=1, out_channels=1, maxpool=False)
+encoder = model.Extractor(in_channels=1, out_channels=1,
+                          use_batchnorm=True, maxpool=False)
 decoder = model.Decoder(classes=forecast)  # forcast 30 days
 
 
@@ -53,7 +54,7 @@ train_info = {
     "kendal": []
 }
 
-for e in range(5000):
+for e in range(500):
 
     kendal_max = -1
 
@@ -72,6 +73,7 @@ for e in range(5000):
             'optimizer_stat': optimizer.state_dict(),
         }
 
+        print("model saved")
         torch.save(checkpoint, os.path.join(root,
                                             "code",
                                             "{}.pth".format(datetime)))
