@@ -54,9 +54,8 @@ train_info = {
     "kendal": []
 }
 
+kendal_max = 1
 for e in range(500):
-
-    kendal_max = -1
 
     train_loss = epoch.train_epoch(predictor, optimizer, trainloader, device)
     pr, gt = epoch.test_epoch(predictor, dataset, device)
@@ -67,7 +66,7 @@ for e in range(500):
     print("Epoch: {}, loss = {:.5f}, kendal = {:.5f}".format(
         e+1, train_loss, kendal))
 
-    if kendal > kendal_max:
+    if kendal < kendal_max:
         checkpoint = {
             'model_stat': predictor.state_dict(),
             'optimizer_stat': optimizer.state_dict(),
