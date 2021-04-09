@@ -88,7 +88,7 @@ if __name__ == '__main__':
     print(len(dataset))
 
     # load path
-    model_path = 'code/2021-04-09_20-05.pth'
+    model_path = 'code/2021-04-09_22-13.pth'
 
     encoder = model.Extractor(in_channels=1, out_channels=1,
                               use_batchnorm=True, maxpool=False)
@@ -105,6 +105,7 @@ if __name__ == '__main__':
     print(normalize([truth]))
     print(normalize([predict]))
 
-    plt.plot(truth, 'b')
-    plt.plot((np.array(predict)+20)*10, 'orange')
+    plt.plot(normalize([truth])[0], 'b')
+    plt.plot(normalize([predict])[0], 'orange')
+    plt.savefig('result.png')
     plt.show()
