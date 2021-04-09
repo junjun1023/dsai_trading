@@ -60,7 +60,7 @@ for e in range(5000):
     train_loss = epoch.train_epoch(predictor, optimizer, trainloader, device)
     pr, gt = epoch.test_epoch(predictor, dataset, device)
 
-    kendal = evaluation.kendal_tau_distance(gt, pr)
+    kendal = evaluation.normalised_kendall_tau_distance(gt, pr)
     train_info["kendal"].append(kendal)
 
     print("Epoch: {}, loss = {:.5f}, kendal = {:.5f}".format(
