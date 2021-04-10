@@ -4,7 +4,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 
-def train_epoch(predictor, optimizer, dataloader, device):
+def train_epoch(predictor, optimizer, dataloader, device, sample_point = 5, mse_weight = 1):
 
     predictor.train()
 
@@ -39,10 +39,10 @@ def train_epoch(predictor, optimizer, dataloader, device):
         # BCE loss
         loss = torch.tensor(0, dtype=torch.float).to(device)
 
-        loss += nn.MSELoss()(pr, gt)
+        loss += nn.MSELoss()(pr, gt) * mse_weight
 
         ### sampling
-        for sample in range(5):
+        for sample in range(sample_point):
 #             for _gt, _pr in zip(gt, pr):
 
             _gt = gt
