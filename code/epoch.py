@@ -3,7 +3,7 @@ import torch.nn as nn
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
-def train_epoch(predictor, optimizer, dataloader, device):
+def train_epoch(predictor, optimizer, dataloader, device, sample=5):
 
         predictor.train()
 
@@ -42,8 +42,8 @@ def train_epoch(predictor, optimizer, dataloader, device):
                 _gt = gt
                 _pr = pr
                 
-                src = (torch.rand(_gt.size(0) * 5) * _gt.size(0)).long()
-                det = (torch.rand(_gt.size(0) * 5) * _gt.size(0)).long()
+                src = (torch.rand(_gt.size(0) * sample) * _gt.size(0)).long()
+                det = (torch.rand(_gt.size(0) * sample) * _gt.size(0)).long()
 
 
                 y_gt = _gt[det] - _gt[src]
