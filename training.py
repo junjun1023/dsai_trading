@@ -17,7 +17,7 @@ from code import evaluation
 
 # variable setting
 root = os.getcwd()
-batch = 64
+batch = 32
 forecast = 30
 samples = 50
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

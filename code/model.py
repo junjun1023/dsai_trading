@@ -204,7 +204,7 @@ class Extractor(nn.Module):
             Conv2dReLU(
                 in_channels,
                 out_channels,
-                kernel_size=1,
+                kernel_size=(2, 50),
                 padding=0,
                 use_batchnorm=use_batchnorm,
             ),
@@ -212,7 +212,7 @@ class Extractor(nn.Module):
             Conv2dReLU(
                 out_channels,
                 out_channels,
-                kernel_size=1,
+                kernel_size=(2, 50),
                 padding=0,
                 use_batchnorm=use_batchnorm,
             )
@@ -231,7 +231,7 @@ class Decoder(nn.Module):
         self.transformer = nn.Transformer(
             d_model=4, nhead=2, num_encoder_layers=6)
         self.linear1 = nn.Linear(
-            in_features=400, out_features=hidden_size//2, bias=True)
+            in_features=4, out_features=hidden_size//2, bias=True)
         self.linear2 = nn.Linear(
             in_features=hidden_size//2, out_features=classes, bias=True)
         self.flatten = nn.Flatten(1)
@@ -239,16 +239,18 @@ class Decoder(nn.Module):
 
     def forward(self, x):
         # x = torch.squeeze(x, 1)    # batch, 100, 4
+        #　check shape of encoder output
+        # print(x.shape)
 
         # uncomment here to use transformer
         #######################################
         # transformer batch is second
-        x = torch.movedim(x, 0, 1)
+        # x = torch.movedim(x, 0, 1)
 
-        x = self.transformer.encoder(x)
+        # x = self.transformer.encoder(x)
 
-        # transformer batch is second
-        x = torch.movedim(x, 0, 1)
+        # # transformer batch is second
+        # x = torch.movedim(x, 0, 1)
         #######################################
 
         x = self.flatten(x)
