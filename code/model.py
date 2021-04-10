@@ -243,12 +243,12 @@ class Decoder(nn.Module):
         # uncomment here to use transformer
         #######################################
         # transformer batch is second
-        # x = torch.movedim(x, 0, 1)
+        x = torch.movedim(x, 0, 1)
 
-        # x = self.transformer.encoder(x)
+        x = self.transformer.encoder(x)
 
-        # # transformer batch is second
-        # x = torch.movedim(x, 0, 1)
+        # transformer batch is second
+        x = torch.movedim(x, 0, 1)
         #######################################
 
         x = self.flatten(x)

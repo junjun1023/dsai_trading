@@ -17,7 +17,7 @@ from code import evaluation
 
 # variable setting
 root = os.getcwd()
-batch = 32
+batch = 64
 forecast = 30
 samples = 5
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -35,7 +35,7 @@ decoder = model.Decoder(classes=forecast)  # forcast 30 days
 
 
 predictor = model.Model(encoder=encoder, decoder=decoder).to(device)
-optimizer = torch.optim.Adam(predictor.parameters(), lr=4e-4)
+optimizer = torch.optim.Adam(predictor.parameters(), lr=3e-4)
 
 print(encoder, decoder)
 

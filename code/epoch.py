@@ -33,31 +33,33 @@ def train_epoch(predictor, optimizer, dataloader, device):
         pr = pr[pos]
 
         # print(gt)
-    #         gt = gt.view(batch, -1)
-    #         pr = pr.view(batch, -1)
+        # gt = gt.view(batch, -1)
+        # pr = pr.view(batch, -1)
 
         # BCE loss
-    #         loss = torch.tensor(0, dtype=torch.float).to(device)
+        loss = torch.tensor(0, dtype=torch.float).to(device)
 
-    #         ### sampling
-    #         for sample in range(5):
-    # #             for _gt, _pr in zip(gt, pr):
+        loss += nn.MSELoss()(pr, gt)
 
-    #                 _gt = gt
-    #                 _pr = pr
+        ### sampling
+        for sample in range(5):
+#             for _gt, _pr in zip(gt, pr):
 
-    #                 src = (torch.rand(_gt.size(0)) * _gt.size(0)).long()
-    #                 det = (torch.rand(_gt.size(0)) * _gt.size(0)).long()
+            _gt = gt
+            _pr = pr
 
-    #                 y_gt = _gt[det] - _gt[src]
-    #                 y_pr = _pr[det] - _pr[src]
+            src = (torch.rand(_gt.size(0)) * _gt.size(0)).long()
+            det = (torch.rand(_gt.size(0)) * _gt.size(0)).long()
 
-    #                 y_gt = torch.where(y_gt >= 0, torch.ones_like(y_gt), torch.zeros_like(y_gt))
+            y_gt = _gt[det] - _gt[src]
+            y_pr = _pr[det] - _pr[src]
 
-    #                 y_pr = nn.Sigmoid()(y_pr)
+            y_gt = torch.where(y_gt >= 0, torch.ones_like(y_gt), torch.zeros_like(y_gt))
 
-    #                 loss += nn.BCELoss()(y_pr, y_gt)
-        loss = nn.MSELoss()(pr, gt)
+            y_pr = nn.Sigmoid()(y_pr)
+
+            loss += nn.BCELoss()(y_pr, y_gt)
+        
 
         loss.backward()
         optimizer.step()
