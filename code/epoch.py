@@ -3,119 +3,121 @@ import torch.nn as nn
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
+
 def train_epoch(predictor, optimizer, dataloader, device):
 
-        predictor.train()
+    predictor.train()
 
-        epoch_loss = 0
-        
-        for index, data in tqdm(enumerate(dataloader)):
+    epoch_loss = 0
 
-                optimizer.zero_grad()
+    for index, data in tqdm(enumerate(dataloader)):
 
-                ref, gt = data # batch, 100, 4
-                gt = gt[:, :, 0].to(device, dtype=torch.float)
-        
-                
-                ref = torch.unsqueeze(ref, 1) # batch, channels, 100, 4
-                ref = torch.transpose(ref, 2, 3) # batch, channels, 4, 100
-                ref = ref.to(device, dtype=torch.float)
+        optimizer.zero_grad()
 
-                _, pr = predictor(ref)
+        ref, gt = data  # batch, 100, 4
+        gt = gt[:, :, 0].to(device, dtype=torch.float)
 
-                
-                pos = torch.isnan(gt)
-                pos = ~ pos
-                
-                gt = gt[pos]
-                pr = pr[pos]
-        #         gt = gt.view(batch, -1)
-        #         pr = pr.view(batch, -1)
-                
-                
-                loss = torch.tensor(0, dtype=torch.float).to(device)
+        ref = torch.unsqueeze(ref, 1)  # batch, channels, 100, 4
+        ref = torch.transpose(ref, 2, 3)  # batch, channels, 4, 100
+        ref = ref.to(device, dtype=torch.float)
 
-                ### sampling
-                for sample in range(5):
-        #             for _gt, _pr in zip(gt, pr):
-                
-                        _gt = gt
-                        _pr = pr
-                        
-                        src = (torch.rand(_gt.size(0)) * _gt.size(0)).long()
-                        det = (torch.rand(_gt.size(0)) * _gt.size(0)).long()
+        _, pr = predictor(ref)
 
+        # print(pr.shape)
+        # print(pr)
 
-                        y_gt = _gt[det] - _gt[src]
-                        y_pr = _pr[det] - _pr[src]
+        pos = torch.isnan(gt)
+        pos = ~ pos
 
-                        y_gt = torch.where(y_gt >= 0, torch.ones_like(y_gt), torch.zeros_like(y_gt))
+        gt = gt[pos]
+        pr = pr[pos]
 
-                        y_pr = nn.Sigmoid()(y_pr)
+        # print(gt)
+    #         gt = gt.view(batch, -1)
+    #         pr = pr.view(batch, -1)
 
+        # BCE loss
+    #         loss = torch.tensor(0, dtype=torch.float).to(device)
 
-                        loss += nn.BCELoss()(y_pr, y_gt)
-                                
-                loss.backward()
-                optimizer.step()
-        
-                epoch_loss += loss.item()
-        
+    #         ### sampling
+    #         for sample in range(5):
+    # #             for _gt, _pr in zip(gt, pr):
 
-        epoch_loss = epoch_loss/(index+1)
+    #                 _gt = gt
+    #                 _pr = pr
 
-        return epoch_loss
+    #                 src = (torch.rand(_gt.size(0)) * _gt.size(0)).long()
+    #                 det = (torch.rand(_gt.size(0)) * _gt.size(0)).long()
+
+    #                 y_gt = _gt[det] - _gt[src]
+    #                 y_pr = _pr[det] - _pr[src]
+
+    #                 y_gt = torch.where(y_gt >= 0, torch.ones_like(y_gt), torch.zeros_like(y_gt))
+
+    #                 y_pr = nn.Sigmoid()(y_pr)
+
+    #                 loss += nn.BCELoss()(y_pr, y_gt)
+        loss = nn.MSELoss()(pr, gt)
+
+        loss.backward()
+        optimizer.step()
+
+        epoch_loss += loss.item()
+
+    epoch_loss = epoch_loss/(index+1)
+
+    return epoch_loss
 
 
 @torch.no_grad()
 def test_epoch(predictor, dataset, device):
-        
-        import math
-        predictor.eval()
 
-        predict = []
-        truth = []
-        forward = []
-        
-        dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=2)
+    import math
+    predictor.eval()
 
-        for index, data in tqdm(enumerate(dataloader)):
+    predict = []
+    truth = []
+    forward = []
 
-                ref, gt = data # batch, 100, 4
-                gt = gt[:, :, 0].to(device, dtype=torch.float)
+    dataloader = DataLoader(dataset, batch_size=1,
+                            shuffle=False, num_workers=2)
 
-                ref = torch.unsqueeze(ref, 1) # batch, channels, 100, 4
-                ref = torch.transpose(ref, 2, 3) # batch, channels, 4, 100
+    for index, data in tqdm(enumerate(dataloader)):
 
-                ref = ref.to(device, dtype=torch.float)
+        ref, gt = data  # batch, 100, 4
+        gt = gt[:, :, 0].to(device, dtype=torch.float)
 
-                _, pr = predictor(ref)
-                
-                pos = torch.isnan(gt)
-                pos = ~ pos
-                
-                gt = gt[pos]
-                pr = pr[pos]
+        ref = torch.unsqueeze(ref, 1)  # batch, channels, 100, 4
+        ref = torch.transpose(ref, 2, 3)  # batch, channels, 4, 100
 
-                pr = pr.detach().cpu().numpy().tolist()
-                gt = gt.detach().cpu().numpy().tolist()
+        ref = ref.to(device, dtype=torch.float)
 
-                truth.append(gt[0])
-                
-                if len(forward) == 0:
-                        forward = pr
-                        forward = [p / math.pow(2, i) for i, p in enumerate(forward)]
-                        
+        _, pr = predictor(ref)
 
-                else:
-                        predict.append(forward[0])
-                        forward = forward[1:] # pop the first element
-                        forward += [0]
-                        
-                        pr = [p / math.pow(2, i+1) for i, p in enumerate(pr)]
-                        
-                        forward = [sum(x) for x in zip(forward, pr)]
+        pos = torch.isnan(gt)
+        pos = ~ pos
 
-        predict += forward
+        gt = gt[pos]
+        pr = pr[pos]
 
-        return predict, truth
+        pr = pr.detach().cpu().numpy().tolist()
+        gt = gt.detach().cpu().numpy().tolist()
+
+        truth.append(gt[0])
+
+        if len(forward) == 0:
+            forward = pr
+            forward = [p / math.pow(2, i) for i, p in enumerate(forward)]
+
+        else:
+            predict.append(forward[0])
+            forward = forward[1:]  # pop the first element
+            forward += [0]
+
+            pr = [p / math.pow(2, i+1) for i, p in enumerate(pr)]
+
+            forward = [sum(x) for x in zip(forward, pr)]
+
+    predict += forward
+
+    return predict, truth

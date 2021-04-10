@@ -86,9 +86,11 @@ if __name__ == '__main__':
     dataset = Dataset(path=os.path.join(root, "training.csv"))
 
     print(len(dataset))
+    x, y = dataset[0]
+    print(x.shape, y.shape)
 
     # load path
-    model_path = 'code/2021-04-09_22-13.pth'
+    model_path = 'code/2021-04-10_02-51.pth'
 
     encoder = model.Extractor(in_channels=1, out_channels=1,
                               use_batchnorm=True, maxpool=False)
@@ -102,10 +104,13 @@ if __name__ == '__main__':
 
     predict, truth = test(predictor, dataset)
 
-    print(normalize([truth]))
-    print(normalize([predict]))
+    # print(normalize([truth]))
+    # print(normalize([predict]))
 
-    plt.plot(normalize([truth])[0], 'b')
-    plt.plot(normalize([predict])[0], 'orange')
+    # plt.plot(normalize([truth])[0], 'b')
+    # plt.plot(normalize([predict])[0], 'orange')
+    print(predict)
+    plt.plot(truth, 'b')
+    plt.plot(predict, 'orange')
     plt.savefig('result.png')
     plt.show()

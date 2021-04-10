@@ -35,7 +35,7 @@ decoder = model.Decoder(classes=forecast)  # forcast 30 days
 
 
 predictor = model.Model(encoder=encoder, decoder=decoder).to(device)
-optimizer = torch.optim.Adam(predictor.parameters(), lr=1e-4)
+optimizer = torch.optim.Adam(predictor.parameters(), lr=4e-4)
 
 print(encoder, decoder)
 
@@ -55,7 +55,7 @@ train_info = {
 }
 
 kendal_max = 1
-for e in range(500):
+for e in range(50000):
 
     train_loss = epoch.train_epoch(predictor, optimizer, trainloader, device)
     pr, gt = epoch.test_epoch(predictor, dataset, device)
@@ -79,3 +79,8 @@ for e in range(500):
         kendal_max = kendal
     with open(os.path.join(root, "code", "{}.json".format(datetime)), 'w') as f:
         json.dump(train_info, f)
+
+    # print("model saved")
+    torch.save(checkpoint, os.path.join(root,
+                                        "code",
+                                        "{}_last.pth".format(datetime)))

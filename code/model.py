@@ -226,10 +226,12 @@ class Decoder(nn.Module):
     def __init__(self, classes, input_size=4, hidden_size=64, num_layers=32, batch_first=True):
         super(Decoder, self).__init__()
 
-        self.rnn = nn.LSTM(input_size=input_size, hidden_size=hidden_size,
-                           num_layers=num_layers, batch_first=True)
+        # self.rnn = nn.LSTM(input_size=input_size, hidden_size=hidden_size,
+        #                    num_layers=num_layers, batch_first=True)
+        self.transformer = nn.Transformer(
+            d_model=4, nhead=2, num_encoder_layers=6)
         self.linear1 = nn.Linear(
-            in_features=hidden_size, out_features=hidden_size//2, bias=True)
+            in_features=400, out_features=hidden_size//2, bias=True)
         self.linear2 = nn.Linear(
             in_features=hidden_size//2, out_features=classes, bias=True)
         self.flatten = nn.Flatten(1)
@@ -238,14 +240,19 @@ class Decoder(nn.Module):
     def forward(self, x):
         # x = torch.squeeze(x, 1)    # batch, 100, 4
 
-        output, (h, c) = self.rnn(x)
-        # print(output.size())
-        # print(h.size())
-        # h = num_layers * num_directions, batch, hidden_size
-        x = torch.transpose(h, 0, 1)
-        # h = batch, num_layers * num_directions, hidden_size
-        x, _ = torch.max(x, dim=1)
-        # x = self.flatten(x)
+        # uncomment here to use transformer
+        #######################################
+        # transformer batch is second
+        # x = torch.movedim(x, 0, 1)
+
+        # x = self.transformer.encoder(x)
+
+        # # transformer batch is second
+        # x = torch.movedim(x, 0, 1)
+        #######################################
+
+        x = self.flatten(x)
+
         x = self.linear1(x)
         x = self.relu(x)
         x = self.linear2(x)
