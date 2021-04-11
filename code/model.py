@@ -217,9 +217,22 @@ class Extractor(nn.Module):
                 use_batchnorm=use_batchnorm,
             )
         )
+        self.transformer = nn.Transformer(
+            d_model=4, nhead=2, num_encoder_layers=6)
 
     def forward(self, x):
-        return self.maxpool_conv(x)
+        # transformer no need channel
+        x = x.squeeze(dim=1)
+
+        # transformer batch is second
+        x = torch.movedim(x, -1, 0)
+
+        x = self.transformer.encoder(x)
+
+        # # transformer batch is second
+        x = torch.movedim(x, 0, 1)
+
+        return x
 
 
 class Decoder(nn.Module):
@@ -231,7 +244,7 @@ class Decoder(nn.Module):
         self.transformer = nn.Transformer(
             d_model=4, nhead=2, num_encoder_layers=6)
         self.linear1 = nn.Linear(
-            in_features=4, out_features=hidden_size//2, bias=True)
+            in_features=400, out_features=hidden_size//2, bias=True)
         self.linear2 = nn.Linear(
             in_features=hidden_size//2, out_features=classes, bias=True)
         self.flatten = nn.Flatten(1)
@@ -272,6 +285,7 @@ class Model(nn.Module):
     def forward(self, x):
 
         latent = self.encoder(x)
-        latent = torch.transpose(latent, 2, 3)
-        latent = torch.squeeze(latent, 1)
+        # uncomment when encoder is cnn 
+        # latent = torch.transpose(latent, 2, 3)
+        # latent = torch.squeeze(latent, 1)
         return latent, self.decoder(latent)
