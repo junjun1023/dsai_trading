@@ -37,7 +37,7 @@ python main.py --training training.csv --testing testing.csv --output output.csv
 ## Methods
 
 - Use `CNN` as encoder(feature extractor) and `torch.nn.Linear` as decoder
-- Based on `#_of_reference_days` predict the open prices of  the following ``
+- Based on `#_of_reference_days` predict the open prices of  the following `forecast_day`
 
 ### Loss
 
