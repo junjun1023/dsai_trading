@@ -51,6 +51,7 @@ python main.py --training training.csv --testing testing.csv --output output.csv
 #### Kendall tau distance
 -  A metric that counts the number of pairwise **disagreements** between two ranking lists.
 -  The lower, the better.
+-  `#_of_opposite_pairs / total`
 
 
 ## Method
