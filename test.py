@@ -81,6 +81,7 @@ if __name__ == '__main__':
     samples = 5
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # device = "cpu"
+    apply_normalize_to_plot = True
 
     # dataset
     dataset = Dataset(path=os.path.join(
@@ -91,7 +92,7 @@ if __name__ == '__main__':
     print(x.shape, y.shape)
 
     # load path
-    model_path = 'code/2021-04-12_18-58.pth'
+    model_path = 'code/2021-04-12_19-15.pth'
 
     encoder = model.Extractor(in_channels=1, out_channels=1,
                               use_batchnorm=True, maxpool=False)
@@ -105,14 +106,15 @@ if __name__ == '__main__':
 
     predict, truth = test(predictor, dataset)
 
-    # print(normalize([truth]))
-    # print(normalize([predict]))
-
-    plt.plot(normalize([truth])[0], 'b')
-    plt.plot(normalize([predict])[0], 'orange')
-    # print(predict)
+    # plot
     plt.grid()
-    # plt.plot(truth, 'b')
-    # plt.plot(predict, 'orange')
+
+    if apply_normalize_to_plot:
+        plt.plot(normalize([truth])[0], 'b')
+        plt.plot(normalize([predict])[0], 'orange')
+    else:
+        plt.plot(truth, 'b')
+        plt.plot(predict, 'orange')
+
     plt.savefig('result.png')
     plt.show()
