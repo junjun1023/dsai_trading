@@ -203,14 +203,14 @@ class Extractor(nn.Module):
         self.maxpool_conv = nn.Sequential(
             Conv2dReLU(
                 in_channels,
-                out_channels,
+                32,
                 kernel_size=(2, 10),
                 padding=0,
                 use_batchnorm=use_batchnorm,
             ),
             nn.AvgPool2d((1, 2)) if maxpool else Identity(),
             Conv2dReLU(
-                out_channels,
+                32,
                 out_channels,
                 kernel_size=(2, 10),
                 padding=0,

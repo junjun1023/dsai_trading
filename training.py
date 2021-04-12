@@ -55,7 +55,7 @@ train_info = {
 }
 
 kendal_max = 1
-for e in range(500):
+for e in range(30):
 
     train_loss = epoch.train_epoch(predictor, optimizer, trainloader,
                                    device, sample_point=samples, value_weigth=0.1, trend_weight=1000)
