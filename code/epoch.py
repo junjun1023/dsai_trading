@@ -46,23 +46,23 @@ def train_epoch(predictor, optimizer, dataloader, device, sample_point=5, value_
         # for sample in range(sample_point):
         #     #             for _gt, _pr in zip(gt, pr):
 
-        _gt = gt
-        _pr = pr
+        # _gt = gt
+        # _pr = pr
 
-        src = (torch.rand(_gt.size(0) * sample_point) * _gt.size(0)).long()
-        det = (torch.rand(_gt.size(0) * sample_point) * _gt.size(0)).long()
+        # src = (torch.rand(_gt.size(0) * sample_point) * _gt.size(0)).long()
+        # det = (torch.rand(_gt.size(0) * sample_point) * _gt.size(0)).long()
 
-        y_gt = _gt[det] - _gt[src]
-        y_pr = _pr[det] - _pr[src]
+        # y_gt = _gt[det] - _gt[src]
+        # y_pr = _pr[det] - _pr[src]
 
         ######################################################
         # edit by fang
         # change comparing two node from using bce to mse
         # and soften gt
         #  y_gt = torch.where(y_gt >= 0, torch.ones_like(y_gt), torch.zeros_like(y_gt))
-        y_gt = nn.Sigmoid()(y_gt)
+        y_gt = nn.Softmax(dim=0)(gt)
 
-        y_pr = nn.Sigmoid()(y_pr)
+        y_pr = nn.Softmax(dim=0)(pr)
 
         loss = nn.BCELoss()(y_pr, y_gt) * trend_weight
         # loss += nn.MSELoss()(y_pr, y_gt) * trend_weight
