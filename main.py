@@ -25,9 +25,9 @@ batch = 8
 # forecast = 30
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 # reference = 300
-# date_time = datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M")
+date_time = datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M")
 # os.makedirs(os.path.join(root, "results", date_time))
-date_time = "2021-04-12_07-59"
+# date_time = "2021-04-12_07-59"
 
 # You can write code above the if-main block.
 def load_checkpoint(filepath, device, forecast):
@@ -68,7 +68,7 @@ if __name__ == '__main__':
                                 default='output.csv',
                                 help='output file name')
         parser.add_argument('--epoch',
-                                default='2000',
+                                default='30',
                                 help='epoch to train')
         parser.add_argument('--sample',
                                 default='10',
@@ -98,7 +98,7 @@ if __name__ == '__main__':
         }
 
         kendal_min = 1
-        for e in range(args.epoch):
+        for e in range(int(args.epoch)):
         
                 train_loss = epoch.train_epoch(predictor, optimizer, trainloader, device, args.sample)
                 pr, gt = epoch.test_epoch(predictor, trainset, device)
