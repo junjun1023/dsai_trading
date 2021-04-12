@@ -4,7 +4,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 
-def train_epoch(predictor, optimizer, dataloader, device, sample_point = 5, mse_weight = 1):
+def train_epoch(predictor, optimizer, dataloader, device, sample_point = 5, value_weigth = 1, trend_weight = 1):
 
     predictor.train()
 
@@ -39,7 +39,7 @@ def train_epoch(predictor, optimizer, dataloader, device, sample_point = 5, mse_
         # BCE loss
         loss = torch.tensor(0, dtype=torch.float).to(device)
 
-        loss += nn.MSELoss()(pr, gt) * mse_weight
+        loss += nn.MSELoss()(pr, gt) * value_weigth
 
         ### sampling
         for sample in range(sample_point):
@@ -54,13 +54,19 @@ def train_epoch(predictor, optimizer, dataloader, device, sample_point = 5, mse_
             y_gt = _gt[det] - _gt[src]
             y_pr = _pr[det] - _pr[src]
 
+            ######################################################
+            # edit by fang
+            # change comparing two node from using bce to mse
+            # and soften gt
             y_gt = torch.where(y_gt >= 0, torch.ones_like(y_gt), torch.zeros_like(y_gt))
+            # y_gt = nn.Sigmoid()(y_gt)
 
             y_pr = nn.Sigmoid()(y_pr)
 
-            loss += nn.BCELoss()(y_pr, y_gt)
+            loss += nn.BCELoss()(y_pr, y_gt) * trend_weight
+            # loss += nn.MSELoss()(y_pr, y_gt) * trend_weight
+            ####################################################
         
-
         loss.backward()
         optimizer.step()
 
