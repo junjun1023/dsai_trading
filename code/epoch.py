@@ -164,10 +164,9 @@ def online_trading(predictor, dataset, device):
         # print(forward)
         min_indices = np.argsort(np.array(forward))         # min to max
         # print(min_indices)
-        
+
         max_indices = min_indices[::-1]         # max to min
         # print(max_indices)
-
 
         max_dist = [1/math.pow(2, i+1) for i in range(len(max_indices-1))]
         # print(max_dist)
@@ -231,4 +230,4 @@ def online_trading(predictor, dataset, device):
 
     # predict += forward
     # return predict, truth
-    return slots
+    return slots[:-1]
