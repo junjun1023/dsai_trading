@@ -146,29 +146,40 @@ def online_trading(predictor, dataset, device):
 
         truth.append(gt[0])
 
-        if len(forward) == 0:
-            forward = pr
-            forward = [p / math.pow(2, i) for i, p in enumerate(forward)]
+        # if len(forward) == 0:
+        #     forward = pr
+        #     forward = [p / math.pow(2, i) for i, p in enumerate(forward)]
 
-        else:
-            predict.append(forward[0])
-            forward = forward[1:]  # pop the first element
-            forward += [0]
+        # else:
+        #     predict.append(forward[0])
+        #     forward = forward[1:]  # pop the first element
+        #     forward += [0]
 
-            pr = [p / math.pow(2, i+1) for i, p in enumerate(pr)]
+        #     pr = [p / math.pow(2, i+1) for i, p in enumerate(pr)]
 
-            forward = [sum(x) for x in zip(forward, pr)]
+        #     forward = [sum(x) for x in zip(forward, pr)]
 
+        forward = pr
+
+        # print(forward)
         min_indices = np.argsort(np.array(forward))         # min to max
+        # print(min_indices)
+        
         max_indices = min_indices[::-1]         # max to min
+        # print(max_indices)
+
 
         max_dist = [1/math.pow(2, i+1) for i in range(len(max_indices-1))]
+        # print(max_dist)
+
         min_dist = [1/math.pow(2, i+1) for i in range(len(min_indices-1))]
+        # print(min_dist)
 
         max_dist.append(1-sum(max_dist))
         min_dist.append(1-sum(min_dist))
 
         max_dist = [x for _, x in sorted(zip(max_indices, max_dist))]
+        # print(max_dist)
         min_dist = [x for _, x in sorted(zip(min_indices, min_dist))]
 
         max_dist = np.array(max_dist)
@@ -179,6 +190,11 @@ def online_trading(predictor, dataset, device):
 
         draw_max = choice(np.array(forward), 1, p=max_dist)
         draw_min = choice(np.array(forward), 1, p=min_dist)
+
+        # print(draw_max)
+        draw_max = forward.index(draw_max)
+        draw_min = forward.index(draw_min)
+        # print(draw_min)
 
         if slot == 0:
             if draw_min == 0:
