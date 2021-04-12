@@ -74,10 +74,20 @@ Default `weight_a` and `weight_b` values are `1000` and `0.1` due to balancing r
 ### Evaluation
 
 #### Kendall tau distance
+https://en.wikipedia.org/wiki/Kendall_tau_distance
 -  A metric that counts the number of pairwise **disagreements** between two ranking lists.
 -  The lower, the better.
 -  `#_of_opposite_pairs / total_pairs`
 
+for example:<br>
+x1 = [1, 2, 3, 4, 5]
+x2 = [6, 7, 8, 9, 10]
+x3 = [10, 9, 8, 7, 6]
+
+k(x1, x2) == 0 <br>
+k(x1, x3) == 1 <br>
+good for predicting trend
+ 
 
 ### Hyper params
 Optimizer = Adam<br>
