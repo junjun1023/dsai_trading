@@ -2,7 +2,7 @@
 Members: 陳香君、方郁文
 
 ## Goal 
-Predict the operating reserve (備轉容量) value from 2021/03/23 to 2021/03/29.
+Maximize the profits in the stock market.
 
 ## How to run
 Python Version: 3.6.12
@@ -37,7 +37,7 @@ python main.py --training training.csv --testing testing.csv --output output.csv
 ## Methods
 
 - Use `CNN` as encoder(feature extractor) and `torch.nn.Linear` as decoder
-- Predict `10` days 
+- Based on `#_of_reference_days` predict the open prices of  the following ``
 
 ### Loss
 
