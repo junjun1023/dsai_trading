@@ -16,7 +16,12 @@ class Dataset(BaseDataset):
                 self.path = path
                 self.forecast = forecast
                 self.reference = reference
-                self.dataframe = pd.read_csv(path, names=["open", "high", "low", "close"])
+
+                self.dataframe = None
+                if isinstance(path, str):
+                        self.dataframe = pd.read_csv(path, names=["open", "high", "low", "close"])
+                elif isinstance(path, pd.DataFrame):
+                        self.dataframe = path
 
                 self.preprocessing = preprocessing
 
