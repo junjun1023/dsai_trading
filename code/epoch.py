@@ -23,55 +23,27 @@ def train_epoch(predictor, optimizer, dataloader, device, sample_point=5, value_
 
         _, pr = predictor(ref)
 
-        # print(pr.shape)
-        # print(pr)
-
         pos = torch.isnan(gt)
         pos = ~ pos
 
+        ###########################################
+        # edit by fang
+        # remove sampling, and use softmax
         gt = gt[pos]
         pr = pr[pos]
 
-        # print(gt)
-        # gt = gt.view(batch, -1)
-        # pr = pr.view(batch, -1)
-
-        # BCE loss
-        # loss = torch.tensor(0, dtype=torch.float).to(device)
-
-        # loss += nn.MSELoss()(pr, gt) * value_weigth
-        # loss += nn.KLDivLoss()(pr, gt) * value_weigth
-
-        # sampling
-        # for sample in range(sample_point):
-        #     #             for _gt, _pr in zip(gt, pr):
-
-        # _gt = gt
-        # _pr = pr
-
-        # src = (torch.rand(_gt.size(0) * sample_point) * _gt.size(0)).long()
-        # det = (torch.rand(_gt.size(0) * sample_point) * _gt.size(0)).long()
-
-        # y_gt = _gt[det] - _gt[src]
-        # y_pr = _pr[det] - _pr[src]
-
-        ######################################################
-        # edit by fang
-        # change comparing two node from using bce to mse
-        # and soften gt
-        #  y_gt = torch.where(y_gt >= 0, torch.ones_like(y_gt), torch.zeros_like(y_gt))
         y_gt = nn.Softmax(dim=0)(gt)
 
         y_pr = nn.Softmax(dim=0)(pr)
 
-        loss = nn.BCELoss()(y_pr, y_gt) * trend_weight
-        # loss += nn.MSELoss()(y_pr, y_gt) * trend_weight
-        ####################################################
+        loss = nn.BCELoss()(y_pr, y_gt) * trend_weight + \
+            nn.MSELoss()(pr.unsqueeze(0), gt.unsqueeze(0)) * value_weigth
 
         loss.backward()
         optimizer.step()
 
         epoch_loss += loss.item()
+        ################################################
 
     epoch_loss = epoch_loss/(index+1)
 

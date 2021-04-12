@@ -91,7 +91,7 @@ if __name__ == '__main__':
     print(x.shape, y.shape)
 
     # load path
-    model_path = 'code/2021-04-12_17-45_last.pth'
+    model_path = 'code/2021-04-12_18-17.pth'
 
     encoder = model.Extractor(in_channels=1, out_channels=1,
                               use_batchnorm=True, maxpool=False)
@@ -113,6 +113,6 @@ if __name__ == '__main__':
     # print(predict)
     plt.grid()
     plt.plot(truth, 'b')
-    plt.plot(np.array(predict)+100, 'orange')
+    plt.plot(predict, 'orange')
     plt.savefig('result.png')
     plt.show()
