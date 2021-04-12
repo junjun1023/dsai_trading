@@ -200,39 +200,28 @@ class Conv2dReLU(nn.Sequential):
 class Extractor(nn.Module):
     def __init__(self, in_channels, out_channels,  use_batchnorm=True, maxpool=True):
         super().__init__()
-        # self.maxpool_conv = nn.Sequential(
-        #     Conv2dReLU(
-        #         in_channels,
-        #         out_channels,
-        #         kernel_size=(2, 50),
-        #         padding=0,
-        #         use_batchnorm=use_batchnorm,
-        #     ),
-        #     nn.AvgPool2d((1, 2)) if maxpool else Identity(),
-        #     Conv2dReLU(
-        #         out_channels,
-        #         out_channels,
-        #         kernel_size=(2, 50),
-        #         padding=0,
-        #         use_batchnorm=use_batchnorm,
-        #     )
-        # )
-        self.transformer = nn.Transformer(
-            d_model=4, nhead=2, num_encoder_layers=6)
+        self.maxpool_conv = nn.Sequential(
+            Conv2dReLU(
+                in_channels,
+                out_channels,
+                kernel_size=(2, 50),
+                padding=0,
+                use_batchnorm=use_batchnorm,
+            ),
+            nn.AvgPool2d((1, 2)) if maxpool else Identity(),
+            Conv2dReLU(
+                out_channels,
+                out_channels,
+                kernel_size=(2, 50),
+                padding=0,
+                use_batchnorm=use_batchnorm,
+            )
+        )
+        # self.transformer = nn.Transformer(
+        #     d_model=4, nhead=2, num_encoder_layers=6)
 
     def forward(self, x):
-        # transformer no need channel
-        x = x.squeeze(dim=1)
-
-        # transformer batch is second
-        x = torch.movedim(x, -1, 0)
-
-        x = self.transformer.encoder(x)
-
-        # # transformer batch is second
-        x = torch.movedim(x, 0, 1)
-
-        return x
+        return self.maxpool_conv(x)
 
 
 class Decoder(nn.Module):
@@ -241,10 +230,10 @@ class Decoder(nn.Module):
 
         # self.rnn = nn.LSTM(input_size=input_size, hidden_size=hidden_size,
         #                    num_layers=num_layers, batch_first=True)
-        self.transformer = nn.Transformer(
-            d_model=4, nhead=2, num_encoder_layers=6)
+        # self.transformer = nn.Transformer(
+        #     d_model=4, nhead=2, num_encoder_layers=6)
         self.linear1 = nn.Linear(
-            in_features=400, out_features=hidden_size//2, bias=True)
+            in_features=4, out_features=hidden_size//2, bias=True)
         self.linear2 = nn.Linear(
             in_features=hidden_size//2, out_features=classes, bias=True)
         self.flatten = nn.Flatten(1)
@@ -286,6 +275,6 @@ class Model(nn.Module):
 
         latent = self.encoder(x)
         # uncomment when encoder is cnn
-        # latent = torch.transpose(latent, 2, 3)
-        # latent = torch.squeeze(latent, 1)
+        latent = torch.transpose(latent, 2, 3)
+        latent = torch.squeeze(latent, 1)
         return latent, self.decoder(latent)

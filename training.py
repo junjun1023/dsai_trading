@@ -20,8 +20,8 @@ root = os.getcwd()
 batch = 32
 forecast = 10
 samples = 50
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# device = "cpu"
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = "cpu"
 
 datetime = datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M")
 
