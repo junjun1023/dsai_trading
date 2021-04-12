@@ -200,23 +200,23 @@ class Conv2dReLU(nn.Sequential):
 class Extractor(nn.Module):
     def __init__(self, in_channels, out_channels,  use_batchnorm=True, maxpool=True):
         super().__init__()
-        self.maxpool_conv = nn.Sequential(
-            Conv2dReLU(
-                in_channels,
-                out_channels,
-                kernel_size=(2, 50),
-                padding=0,
-                use_batchnorm=use_batchnorm,
-            ),
-            nn.AvgPool2d((1, 2)) if maxpool else Identity(),
-            Conv2dReLU(
-                out_channels,
-                out_channels,
-                kernel_size=(2, 50),
-                padding=0,
-                use_batchnorm=use_batchnorm,
-            )
-        )
+        # self.maxpool_conv = nn.Sequential(
+        #     Conv2dReLU(
+        #         in_channels,
+        #         out_channels,
+        #         kernel_size=(2, 50),
+        #         padding=0,
+        #         use_batchnorm=use_batchnorm,
+        #     ),
+        #     nn.AvgPool2d((1, 2)) if maxpool else Identity(),
+        #     Conv2dReLU(
+        #         out_channels,
+        #         out_channels,
+        #         kernel_size=(2, 50),
+        #         padding=0,
+        #         use_batchnorm=use_batchnorm,
+        #     )
+        # )
         self.transformer = nn.Transformer(
             d_model=4, nhead=2, num_encoder_layers=6)
 
@@ -285,7 +285,7 @@ class Model(nn.Module):
     def forward(self, x):
 
         latent = self.encoder(x)
-        # uncomment when encoder is cnn 
+        # uncomment when encoder is cnn
         # latent = torch.transpose(latent, 2, 3)
         # latent = torch.squeeze(latent, 1)
         return latent, self.decoder(latent)

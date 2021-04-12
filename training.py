@@ -18,7 +18,7 @@ from code import evaluation
 # variable setting
 root = os.getcwd()
 batch = 32
-forecast = 30
+forecast = 10
 samples = 50
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # device = "cpu"
@@ -26,7 +26,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 datetime = datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M")
 
 # dataset
-dataset = Dataset(path=os.path.join(root, "training.csv"))
+dataset = Dataset(path=os.path.join(root, "training.csv"), forecast=forecast)
 
 # model
 encoder = model.Extractor(in_channels=1, out_channels=1,
@@ -57,7 +57,8 @@ train_info = {
 kendal_max = 1
 for e in range(500):
 
-    train_loss = epoch.train_epoch(predictor, optimizer, trainloader, device, sample_point=samples, value_weigth=0.15, trend_weight=100)
+    train_loss = epoch.train_epoch(predictor, optimizer, trainloader,
+                                   device, sample_point=samples, value_weigth=0, trend_weight=1)
     pr, gt = epoch.test_epoch(predictor, dataset, device)
 
     kendal = evaluation.normalised_kendall_tau_distance(gt, pr)

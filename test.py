@@ -77,20 +77,21 @@ if __name__ == '__main__':
     # parameter
     root = os.getcwd()
     batch = 8
-    forecast = 30
+    forecast = 10
     samples = 5
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # device = "cpu"
 
     # dataset
-    dataset = Dataset(path=os.path.join(root, "training.csv"))
+    dataset = Dataset(path=os.path.join(
+        root, "training.csv"), forecast=forecast)
 
     print(len(dataset))
     x, y = dataset[0]
     print(x.shape, y.shape)
 
     # load path
-    model_path = 'code/2021-04-11_13-20_last.pth'
+    model_path = 'code/2021-04-12_17-14_last.pth'
 
     encoder = model.Extractor(in_channels=1, out_channels=1,
                               use_batchnorm=True, maxpool=False)
@@ -107,10 +108,10 @@ if __name__ == '__main__':
     # print(normalize([truth]))
     # print(normalize([predict]))
 
-    # plt.plot(normalize([truth])[0], 'b')
-    # plt.plot(normalize([predict])[0], 'orange')
-    print(predict)
-    plt.plot(truth, 'b')
-    plt.plot(predict, 'orange')
+    plt.plot(normalize([truth])[0], 'b')
+    plt.plot(normalize([predict])[0], 'orange')
+    # print(predict)
+    # plt.plot(truth, 'b')
+    # plt.plot(predict, 'orange')
     plt.savefig('result.png')
     plt.show()
