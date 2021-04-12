@@ -23,8 +23,8 @@ import pandas as pd
 root = os.getcwd()
 batch = 32
 # forecast = 30
-# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-device = 'cpu'
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = 'cpu'
 # reference = 300
 date_time = datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M")
 os.makedirs(os.path.join(root, "results", date_time))
