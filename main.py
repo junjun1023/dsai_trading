@@ -93,31 +93,31 @@ if __name__ == '__main__':
         ###### End Data
 
         ###### Train
-        # train_info = {
-        #         "kendal": []
-        # }
+        train_info = {
+                "kendal": []
+        }
 
-        # kendal_min = 1
-        # for e in range(args.epoch):
+        kendal_min = 1
+        for e in range(args.epoch):
         
-        #         train_loss = epoch.train_epoch(predictor, optimizer, trainloader, device, args.sample)
-        #         pr, gt = epoch.test_epoch(predictor, trainset, device)
+                train_loss = epoch.train_epoch(predictor, optimizer, trainloader, device, args.sample)
+                pr, gt = epoch.test_epoch(predictor, trainset, device)
                 
-        #         kendal = evaluation.normalised_kendall_tau_distance(gt, pr)
-        #         train_info["kendal"].append(kendal)
+                kendal = evaluation.normalised_kendall_tau_distance(gt, pr)
+                train_info["kendal"].append(kendal)
                 
-        #         print("Epoch: {}, loss = {:.5f}, kendal = {:.5f}".format(e+1, train_loss, kendal))
+                print("Epoch: {}, loss = {:.5f}, kendal = {:.5f}".format(e+1, train_loss, kendal))
                 
-        #         if kendal < kendal_min:
-        #                 checkpoint = {
-        #                         'model_stat': predictor.state_dict(),
-        #                         'optimizer_stat': optimizer.state_dict(),
-        #                 }
+                if kendal < kendal_min:
+                        checkpoint = {
+                                'model_stat': predictor.state_dict(),
+                                'optimizer_stat': optimizer.state_dict(),
+                        }
 
-        #                 torch.save(checkpoint, os.path.join(root, "results", date_time, "{}.pth".format(date_time)))
-        #                 kendal_min = kendal
-        #         with open(os.path.join(root, "results", date_time, "{}.json".format(date_time)), 'w') as f:
-        #                 json.dump(train_info, f)
+                        torch.save(checkpoint, os.path.join(root, "results", date_time, "{}.pth".format(date_time)))
+                        kendal_min = kendal
+                with open(os.path.join(root, "results", date_time, "{}.json".format(date_time)), 'w') as f:
+                        json.dump(train_info, f)
         ###### End Train
 
         ###### Test
