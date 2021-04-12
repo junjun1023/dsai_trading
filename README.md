@@ -59,10 +59,17 @@ Model Architecture<br>
 
 ### Loss
 
-- GT: `nn.Softmax(open_values_of_forecast)`
-- PR: `nn.Softmax(model.output)`
+- Ground Truth(GT): `nn.Softmax(open_values_of_forecast)`
+- Predict(PR): `nn.Softmax(model.output)`
+- Ground Truth Raw(GTR): `open_values_of_forecast`
+- Predict Raw(PRR): `model.output`
 
-- loss: `weight_a * nn.BCELoss(GT, PR) + weight_b * nn.MSELoss(GT, PR)`
+- loss: `weight_a * nn.BCELoss(GT, PR) + weight_b * nn.MSELoss(GTR, PRR)`
+
+We care more about the "trend" of the stock price instead of the "absolute value", so we apply softmax to "Ground Truth" and "Predict", and use BCE loss to predict the "Trend"<br>
+However we still add MSELoss to constrain the predict value<br>
+Default `weight_a` and `weight_b` values are `1000` and `0.1` due to balancing reasons.<br>
+
 
 ### Evaluation
 
