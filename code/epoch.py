@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 
 
-def train_epoch(predictor, optimizer, dataloader, device, sample=5, value_weigth=1, trend_weight=1):
+def train_epoch(predictor, optimizer, dataloader, device, sample=5, value_weigth=0.1, trend_weight=1000):
 
     predictor.train()
 

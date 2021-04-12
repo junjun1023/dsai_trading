@@ -92,7 +92,7 @@ if __name__ == '__main__':
     print(x.shape, y.shape)
 
     # load path
-    model_path = 'code/2021-04-12_21-02.pth'
+    model_path = 'results/2021-04-12_21-02_best/2021-04-12_21-02.pth'
 
     encoder = model.Extractor(in_channels=1, out_channels=1,
                               use_batchnorm=True, maxpool=False)
