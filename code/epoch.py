@@ -126,7 +126,7 @@ def test_epoch(predictor, dataset, device):
 def online_trading(predictor, dataset, device):
         
         import math
-        from np.random import choice
+        from numpy.random import choice
 
         predictor.eval()
 
@@ -180,11 +180,21 @@ def online_trading(predictor, dataset, device):
 
                 min_indices = np.argsort(np.array(forward))         # min to max
                 max_indices = min_indices[::-1]         # max to min
-                max_dist = [1/math.pow(2, i+1) for i in range(len(max_indices))]
-                min_dist = [1/math.pow(2, i+1) for i in range(len(min_indices))]
+                
+                max_dist = [1/math.pow(2, i+1) for i in range(len(max_indices-1))]
+                min_dist = [1/math.pow(2, i+1) for i in range(len(min_indices-1))]
+
+                max_dist.append(1-sum(max_dist))
+                min_dist.append(1-sum(min_dist))
 
                 max_dist = [x for _, x in sorted(zip(max_indices, max_dist))]
                 min_dist = [x for _, x in sorted(zip(min_indices, min_dist))]
+
+                max_dist = np.array(max_dist)
+                max_dist /= max_dist.sum()
+
+                min_dist = np.array(min_dist)
+                min_dist /= min_dist.sum()
 
                 draw_max = choice(np.array(forward), 1, p=max_dist)
                 draw_min = choice(np.array(forward), 1, p=min_dist)
