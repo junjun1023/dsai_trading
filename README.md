@@ -72,50 +72,10 @@ Model Architecture<br>
 -  `#_of_opposite_pairs / total_pairs`
 
 
-## Method
-使用Pytorch 進行Deep Learning<br>
-搭建Fully connected的Neural Network<br>
-```
-class LinearModel(nn.Module):
-    def __init__(self):
-        super(LinearModel, self).__init__()
-
-        self.fc0 = nn.Linear(20, 128)
-        self.fc1 = nn.Linear(128, 512)
-        self.fc2 = nn.Linear(512, 128)
-        self.fc = nn.Linear(128, 7)
-        self.flatten = nn.Flatten()
-
-        self.relu = nn.ReLU()
-
-    def forward(self, x):
-        x = self.fc0(x)
-        x = self.relu(x)
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        x = self.relu(x)
-        x = self.fc(x)
-
-        return x
-```
-
-### Input: 
-```
-concat(10筆電力資料, 10筆天氣資料) 
-```
-其中，天氣資料以及電力資料日期會錯開
-### Output:
-未來7天備轉容量(MW)
-
-### training hyperparameters
-Loss = Mean Square Error<br>
+### Hyper params
 Optimizer = Adam<br>
-Learning Rate = 4 * 10^-4<br>
+Learning Rate = 3 * 10^-4<br>
 Epoches = 100<br>
-
-## Predict Example
-![alt text](train_result/fit_result.png)
 
 
 - Line chart of trading training.csv
