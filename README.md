@@ -2,7 +2,18 @@
 Members: 陳香君、方郁文
 
 ## Goal 
-Maximize the profits in the stock market.
+Predict the "Action to take" in order to "Maximize" the profit you gain in the stock market.<br>
+<br>
+According to hw2 description<br>
+The action should be one of these three types:<br>
+1 → means to “Buy” the stock. If you short 1 unit, you will return to 0 as the open price in the next day. If you did not have any unit, you will have 1 unit as the open price in the next day. “If you already have 1 unit, your code will be terminated due to the invalid status.“<br>
+<br>
+0 → means to “NoAction”. If you have 1-unit now, hold it. If your slot is available, the status continues. If you short 1 unit, the status continues.<br>
+<br>
+-1 → means to “Sell” the stock. If you hold 1 unit, your will return to 0 as the open price in the next day. If you did not have any unit, we will short 1 unit as the open price in the next day. “If you already short 1 unit, your code will be terminated due to the invalid status.“<br>
+<br>
+In the final day, if you hold/short the stock, we will force your slot empty as the close price of the final day in the testing period. Finally, your account will be settled and your profit will be calculated.
+
 
 ## How to run
 Python Version: 3.6.12
@@ -36,8 +47,15 @@ python main.py --training training.csv --testing testing.csv --output output.csv
 
 ## Methods
 
+Implement Convolutional Neural Network as Predictor
+
 - Use `CNN` as encoder(feature extractor) and `torch.nn.Linear` as decoder
-- Based on `#_of_reference_days` predict the open prices of  the following `forecast_day`
+- Input `100 or MORE` days of features (Open, High, Low, Close)
+- Predict `10 or MORE` days of Open price
+<br>
+Model Architecture<br>
+
+![alt text](model_architecture.png)
 
 ### Loss
 
