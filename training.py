@@ -20,8 +20,8 @@ root = os.getcwd()
 batch = 32
 forecast = 10
 samples = 50
-# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-device = "cpu"
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = "cpu"
 
 datetime = datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M")
 
@@ -58,7 +58,7 @@ kendal_max = 1
 for e in range(500):
 
     train_loss = epoch.train_epoch(predictor, optimizer, trainloader,
-                                   device, sample_point=samples, value_weigth=1e-5, trend_weight=1)
+                                   device, sample_point=samples, value_weigth=1, trend_weight=1)
     pr, gt = epoch.test_epoch(predictor, dataset, device)
 
     kendal = evaluation.normalised_kendall_tau_distance(gt, pr)
