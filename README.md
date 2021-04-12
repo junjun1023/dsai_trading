@@ -82,9 +82,12 @@ Default `weight_a` and `weight_b` values are `1000` and `0.1` due to balancing r
 ### Hyper params
 Optimizer = Adam<br>
 Learning Rate = 3 * 10^-4<br>
-Epoches = 100<br>
+Epoches = 30<br>
 
 
 - Line chart of trading training.csv
 
 ![](Trading.png)
+
+### training steps
+![](training_gif.gif)
