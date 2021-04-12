@@ -8,32 +8,42 @@ Predict the operating reserve (備轉容量) value from 2021/03/23 to 2021/03/29
 Python Version: 3.6.12
 ### Args 介紹
 ```
-    '--mode':
-                       'input eval or train'
-
     '--training':
-    和
-     '--training2':
-                       2020電力資料和2021電力資料
+                    train file path, default training.csv
 
-    '--weather_past':
-                        過去一年天氣資料
+    '--testing':
+                    test file path, default testing.csv
+                    
+     '--output':
+                    output file path, default output.csv
+
+    '--epoch':
+                    number of epochs to train, default 30
                        
-    '--weather_forecast':
-                       未來7天氣預報
+    '--reference':
+                    number of reference days, default 100
 
-    '--output':
-                        output 檔案名稱
+    '--forecast':
+                    number of predict days, default 10
 ```
+### Execution
+
+Run the command below and will get action of each day
+
+```
+python main.py --training training.csv --testing testing.csv --output output.csv
+```
+
+## Methods
+
+- Use `CNN` as encoder(feature extractor) and `torch.nn.Linear` as decoder
+- Predict `10` days 
+
 ### Evaluation
-執行 'run_eval.sh'
-```
-./run_eval.sh
-```
-或執行
-```
-python app.py --mode eval --training dataset/eletricity/2020年度每日尖峰備轉容量率.csv --training2 dataset/eletricity/2021年度每日尖峰備轉容量率.csv --weather_past dataset/weather/weather_day.csv --weather_forecast dataset/weather/weather_forecast.csv --output submission.csv
-```
+
+#### Kendall tau distance
+-  A metric that counts the number of pairwise **disagreements** between two ranking lists.
+-  The lower, the better.
 
 ### Training
 執行 'run_train.sh'
