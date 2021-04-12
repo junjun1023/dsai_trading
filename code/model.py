@@ -215,7 +215,8 @@ class Extractor(nn.Module):
                 kernel_size=(2, 10),
                 padding=0,
                 use_batchnorm=use_batchnorm,
-            )
+            ),
+            nn.AdaptiveAvgPool2d((82, 2))
         )
         # self.transformer = nn.Transformer(
         #     d_model=4, nhead=2, num_encoder_layers=6)
