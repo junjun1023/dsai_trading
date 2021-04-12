@@ -91,7 +91,7 @@ if __name__ == '__main__':
     print(x.shape, y.shape)
 
     # load path
-    model_path = 'code/2021-04-12_18-39.pth'
+    model_path = 'code/2021-04-12_18-58.pth'
 
     encoder = model.Extractor(in_channels=1, out_channels=1,
                               use_batchnorm=True, maxpool=False)
@@ -108,11 +108,11 @@ if __name__ == '__main__':
     # print(normalize([truth]))
     # print(normalize([predict]))
 
-    # plt.plot(normalize([truth])[0], 'b')
-    # plt.plot(normalize([predict])[0], 'orange')
+    plt.plot(normalize([truth])[0], 'b')
+    plt.plot(normalize([predict])[0], 'orange')
     # print(predict)
     plt.grid()
-    plt.plot(truth, 'b')
-    plt.plot(predict, 'orange')
+    # plt.plot(truth, 'b')
+    # plt.plot(predict, 'orange')
     plt.savefig('result.png')
     plt.show()

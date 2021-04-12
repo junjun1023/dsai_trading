@@ -58,7 +58,7 @@ kendal_max = 1
 for e in range(500):
 
     train_loss = epoch.train_epoch(predictor, optimizer, trainloader,
-                                   device, sample_point=samples, value_weigth=1, trend_weight=1)
+                                   device, sample_point=samples, value_weigth=1, trend_weight=10000)
     pr, gt = epoch.test_epoch(predictor, dataset, device)
 
     kendal = evaluation.normalised_kendall_tau_distance(gt, pr)
