@@ -41,8 +41,10 @@ python main.py --training training.csv --testing testing.csv --output output.csv
 
 ### Loss
 
+- GT: `nn.Softmax(open_values_of_forecast)`
+- PR: `nn.Softmax(model.output)`
 
-
+- loss: `weight_a * nn.BCELoss(GT, PR) + weight_b * nn.MSELoss(GT, PR)`
 
 ### Evaluation
 
