@@ -4,237 +4,215 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 import numpy as np
 
-def train_epoch(predictor, optimizer, dataloader, device, sample=5):
 
-        predictor.train()
+def train_epoch(predictor, optimizer, dataloader, device, sample=5, value_weigth=1, trend_weight=1):
 
-        epoch_loss = 0
-        
-        for index, data in tqdm(enumerate(dataloader)):
+    predictor.train()
 
-                optimizer.zero_grad()
+    epoch_loss = 0
 
-                ref, gt = data # batch, 100, 4
-                gt = gt[:, :, 0].to(device, dtype=torch.float)
-        
-                
-                ref = torch.unsqueeze(ref, 1) # batch, channels, 100, 4
-                ref = torch.transpose(ref, 2, 3) # batch, channels, 4, 100
-                ref = ref.to(device, dtype=torch.float)
+    for index, data in tqdm(enumerate(dataloader)):
 
-                _, pr = predictor(ref)
+        optimizer.zero_grad()
 
-                
-                pos = torch.isnan(gt)
-                pos = ~ pos
-                
-                gt = gt[pos]
-                pr = pr[pos]
-                # gt = gt.view(batch, -1)
-                # pr = pr.view(batch, -1)
-                
-                
-                # loss = torch.tensor(0, dtype=torch.float).to(device)
+        ref, gt = data  # batch, 100, 4
+        gt = gt[:, :, 0].to(device, dtype=torch.float)
 
-                ### sampling
-                # for sample in range(5):
-                #     for _gt, _pr in zip(gt, pr):
-                
-                _gt = gt
-                _pr = pr
-                
-                src = (torch.rand(_gt.size(0) * sample) * _gt.size(0)).long()
-                det = (torch.rand(_gt.size(0) * sample) * _gt.size(0)).long()
+        ref = torch.unsqueeze(ref, 1)  # batch, channels, 100, 4
+        ref = torch.transpose(ref, 2, 3)  # batch, channels, 4, 100
+        ref = ref.to(device, dtype=torch.float)
 
+        _, pr = predictor(ref)
 
-                y_gt = _gt[det] - _gt[src]
-                y_pr = _pr[det] - _pr[src]
+        pos = torch.isnan(gt)
+        pos = ~ pos
 
-                y_gt = torch.where(y_gt >= 0, torch.ones_like(y_gt), torch.zeros_like(y_gt))
+        ###########################################
+        # edit by fang
+        # remove sampling, and use softmax
+        gt = gt[pos]
+        pr = pr[pos]
 
-                y_pr = nn.Sigmoid()(y_pr)
+        y_gt = nn.Softmax(dim=0)(gt)
 
+        y_pr = nn.Softmax(dim=0)(pr)
 
-                loss = nn.BCELoss()(y_pr, y_gt)
-                                
-                loss.backward()
-                optimizer.step()
-        
-                epoch_loss += loss.item()
-        
+        loss = nn.BCELoss()(y_pr, y_gt) * trend_weight + \
+            nn.MSELoss()(pr.unsqueeze(0), gt.unsqueeze(0)) * value_weigth
 
-        epoch_loss = epoch_loss/(index+1)
+        loss.backward()
+        optimizer.step()
 
-        return epoch_loss
+        epoch_loss += loss.item()
+        ################################################
+
+    epoch_loss = epoch_loss/(index+1)
+
+    return epoch_loss
 
 
 @torch.no_grad()
 def test_epoch(predictor, dataset, device):
-        
-        import math
-        predictor.eval()
 
-        predict = []
-        truth = []
-        forward = []
-        
-        dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=2)
+    import math
+    predictor.eval()
 
-        for index, data in tqdm(enumerate(dataloader)):
+    predict = []
+    truth = []
+    forward = []
 
-                ref, gt = data # batch, 100, 4
-                gt = gt[:, :, 0].to(device, dtype=torch.float)
+    dataloader = DataLoader(dataset, batch_size=1,
+                            shuffle=False, num_workers=2)
 
-                ref = torch.unsqueeze(ref, 1) # batch, channels, 100, 4
-                ref = torch.transpose(ref, 2, 3) # batch, channels, 4, 100
+    for index, data in tqdm(enumerate(dataloader)):
 
-                ref = ref.to(device, dtype=torch.float)
+        ref, gt = data  # batch, 100, 4
+        gt = gt[:, :, 0].to(device, dtype=torch.float)
 
-                _, pr = predictor(ref)
-                
-                pos = torch.isnan(gt)
-                pos = ~ pos
-                
-                gt = gt[pos]
-                pr = pr[pos]
+        ref = torch.unsqueeze(ref, 1)  # batch, channels, 100, 4
+        ref = torch.transpose(ref, 2, 3)  # batch, channels, 4, 100
 
-                pr = pr.detach().cpu().numpy().tolist()
-                gt = gt.detach().cpu().numpy().tolist()
+        ref = ref.to(device, dtype=torch.float)
 
-                truth.append(gt[0])
-                
-                if len(forward) == 0:
-                        forward = pr
-                        forward = [p / math.pow(2, i) for i, p in enumerate(forward)]
-                        
+        _, pr = predictor(ref)
 
-                else:
-                        predict.append(forward[0])
-                        forward = forward[1:] # pop the first element
-                        forward += [0]
-                        
-                        pr = [p / math.pow(2, i+1) for i, p in enumerate(pr)]
-                        
-                        forward = [sum(x) for x in zip(forward, pr)]
+        pos = torch.isnan(gt)
+        pos = ~ pos
 
-        predict += forward
+        gt = gt[pos]
+        pr = pr[pos]
 
-        return predict, truth
+        pr = pr.detach().cpu().numpy().tolist()
+        gt = gt.detach().cpu().numpy().tolist()
 
+        truth.append(gt[0])
+
+        if len(forward) == 0:
+            forward = pr
+            forward = [p / math.pow(2, i) for i, p in enumerate(forward)]
+
+        else:
+            predict.append(forward[0])
+            forward = forward[1:]  # pop the first element
+            forward += [0]
+
+            pr = [p / math.pow(2, i+1) for i, p in enumerate(pr)]
+
+            forward = [sum(x) for x in zip(forward, pr)]
+
+    predict += forward
+
+    return predict, truth
 
 
 def online_trading(predictor, dataset, device):
-        
-        import math
-        from numpy.random import choice
 
-        predictor.eval()
+    import math
+    from numpy.random import choice
 
-        predict = []
-        truth = []
-        forward = []
+    predictor.eval()
 
-        slot = 0
-        profit = 0
-        slots = []
+    predict = []
+    truth = []
+    forward = []
 
-        dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=2)
+    slot = 0
+    profit = 0
+    slots = []
 
-        for index, data in tqdm(enumerate(dataloader)):
+    dataloader = DataLoader(dataset, batch_size=1,
+                            shuffle=False, num_workers=2)
 
-                ref, gt = data # batch, 100, 4
-                gt = gt[:, :, 0].to(device, dtype=torch.float)
+    for index, data in tqdm(enumerate(dataloader)):
 
-                ref = torch.unsqueeze(ref, 1) # batch, channels, 100, 4
-                ref = torch.transpose(ref, 2, 3) # batch, channels, 4, 100
+        ref, gt = data  # batch, 100, 4
+        gt = gt[:, :, 0].to(device, dtype=torch.float)
 
-                ref = ref.to(device, dtype=torch.float)
+        ref = torch.unsqueeze(ref, 1)  # batch, channels, 100, 4
+        ref = torch.transpose(ref, 2, 3)  # batch, channels, 4, 100
 
-                _, pr = predictor(ref)
-                
-                pos = torch.isnan(gt)
-                pos = ~ pos
-                
-                gt = gt[pos]
-                pr = pr[pos]
+        ref = ref.to(device, dtype=torch.float)
 
-                pr = pr.detach().cpu().numpy().tolist()
-                gt = gt.detach().cpu().numpy().tolist()
+        _, pr = predictor(ref)
 
-                truth.append(gt[0])
-                
-                if len(forward) == 0:
-                        forward = pr
-                        forward = [p / math.pow(2, i) for i, p in enumerate(forward)]
-                        
+        pos = torch.isnan(gt)
+        pos = ~ pos
 
-                else:
-                        predict.append(forward[0])
-                        forward = forward[1:] # pop the first element
-                        forward += [0]
-                        
-                        pr = [p / math.pow(2, i+1) for i, p in enumerate(pr)]
-                        
-                        forward = [sum(x) for x in zip(forward, pr)]
+        gt = gt[pos]
+        pr = pr[pos]
 
+        pr = pr.detach().cpu().numpy().tolist()
+        gt = gt.detach().cpu().numpy().tolist()
 
-                min_indices = np.argsort(np.array(forward))         # min to max
-                max_indices = min_indices[::-1]         # max to min
-                
-                max_dist = [1/math.pow(2, i+1) for i in range(len(max_indices-1))]
-                min_dist = [1/math.pow(2, i+1) for i in range(len(min_indices-1))]
+        truth.append(gt[0])
 
-                max_dist.append(1-sum(max_dist))
-                min_dist.append(1-sum(min_dist))
+        if len(forward) == 0:
+            forward = pr
+            forward = [p / math.pow(2, i) for i, p in enumerate(forward)]
 
-                max_dist = [x for _, x in sorted(zip(max_indices, max_dist))]
-                min_dist = [x for _, x in sorted(zip(min_indices, min_dist))]
+        else:
+            predict.append(forward[0])
+            forward = forward[1:]  # pop the first element
+            forward += [0]
 
-                max_dist = np.array(max_dist)
-                max_dist /= max_dist.sum()
+            pr = [p / math.pow(2, i+1) for i, p in enumerate(pr)]
 
-                min_dist = np.array(min_dist)
-                min_dist /= min_dist.sum()
+            forward = [sum(x) for x in zip(forward, pr)]
 
-                draw_max = choice(np.array(forward), 1, p=max_dist)
-                draw_min = choice(np.array(forward), 1, p=min_dist)
+        min_indices = np.argsort(np.array(forward))         # min to max
+        max_indices = min_indices[::-1]         # max to min
 
-                if slot == 0:
-                        if draw_min == 0:
-                                print("buy")
-                                slot = 1
-                                profit = profit - gt[0]
-                                slots.append(1)
-                        elif draw_max == 0:
-                                print("sell")
-                                slot = -1
-                                profit = profit + gt[0]
-                                slots.append(-1)
-                        else:
-                                print("no thing")
-                                slots.append(0)
-                elif slot == 1:
-                        if draw_max == 0:
-                                print("sell")
-                                slot = 0
-                                profit = profit + gt[0]
-                                slots.append(-1)
-                        else:
-                                print("no thing")
-                                slots.append(0)
-                else:
-                        if draw_min == 0:
-                                print("buy")
-                                slot = 1
-                                profit = profit - gt[0]
-                                slots.append(1)
-                        else:
-                                print("no thing")
-                                slots.append(0)
+        max_dist = [1/math.pow(2, i+1) for i in range(len(max_indices-1))]
+        min_dist = [1/math.pow(2, i+1) for i in range(len(min_indices-1))]
 
+        max_dist.append(1-sum(max_dist))
+        min_dist.append(1-sum(min_dist))
 
+        max_dist = [x for _, x in sorted(zip(max_indices, max_dist))]
+        min_dist = [x for _, x in sorted(zip(min_indices, min_dist))]
 
+        max_dist = np.array(max_dist)
+        max_dist /= max_dist.sum()
 
-        # predict += forward
-        # return predict, truth
-        return slots
+        min_dist = np.array(min_dist)
+        min_dist /= min_dist.sum()
+
+        draw_max = choice(np.array(forward), 1, p=max_dist)
+        draw_min = choice(np.array(forward), 1, p=min_dist)
+
+        if slot == 0:
+            if draw_min == 0:
+                print("buy")
+                slot = 1
+                profit = profit - gt[0]
+                slots.append(1)
+            elif draw_max == 0:
+                print("sell")
+                slot = -1
+                profit = profit + gt[0]
+                slots.append(-1)
+            else:
+                print("no thing")
+                slots.append(0)
+        elif slot == 1:
+            if draw_max == 0:
+                print("sell")
+                slot = 0
+                profit = profit + gt[0]
+                slots.append(-1)
+            else:
+                print("no thing")
+                slots.append(0)
+        else:
+            if draw_min == 0:
+                print("buy")
+                slot = 1
+                profit = profit - gt[0]
+                slots.append(1)
+            else:
+                print("no thing")
+                slots.append(0)
+
+    # predict += forward
+    # return predict, truth
+    return slots
